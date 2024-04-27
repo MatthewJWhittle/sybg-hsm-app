@@ -1,0 +1,15 @@
+shiny
+shinyswatch
+shinywidgets
+geopandas
+pyproj
+pandas
+rioxarray
+xarray
+numpy
+pyarrow
+matplotlib 
+python-dotenv
+ipyleaflet
+fsspec
+gcsfs

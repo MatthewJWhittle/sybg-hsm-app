@@ -1,0 +1,24 @@
+name: hsm-dash
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - geopandas
+  - pyproj
+  - pandas
+  - rioxarray
+  - xarray
+  - numpy
+  - pyarrow
+  - matplotlib 
+  - ipyleaflet
+  - pip
+  - pip:
+    - shiny
+    - shinyswatch
+    - shinywidgets
+    - python-dotenv
+    - fsspec
+    - gcsfs
