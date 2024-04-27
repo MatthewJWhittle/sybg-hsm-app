@@ -1,8 +1,6 @@
 "Main entry point for the dashboard app."
-import json
 from pathlib import Path
 
-from matplotlib.cm import get_cmap
 import matplotlib.pyplot as plt
 from shiny import App, render, ui, reactive
 from ipyleaflet import (
@@ -18,9 +16,10 @@ from dotenv import load_dotenv
 
 
 # Local imports
+from modules.ui import app_ui
+
 from app_utils.map import record_popup, generate_basemap, layer_exists, get_layer
 from app_config import species_name_mapping, feature_names
-from modules.ui import app_ui
 from app_utils.data import (
     load_training_data,
     load_partial_dependence_data,
@@ -36,14 +35,6 @@ from app_utils.geo import project_bbox
 app_dir = Path(__file__).parent
 css_path = app_dir / "www" / "styles.css"
 
-def load_deployment_config():
-    path = f"{app_dir}/rsconnect-python/dashboard.json"
-    with open(path, "r") as f:
-        config = json.load(f)
-    return config
-
-
-
 load_dotenv()
 
 
@@ -51,8 +42,6 @@ load_dotenv()
 
 
 ## Load all static app data ----------
-
-
 results_df = load_results_df()
 training_data_gdf = load_training_data()
 partial_dependence_df = load_partial_dependence_data()
