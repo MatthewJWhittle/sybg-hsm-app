@@ -1,0 +1,51 @@
+# This workflow deploys the application to Shiny Apps.io when a release is created
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Deploy dev Application on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install rsconnect-python
+    - name: Register
+      run: | 
+        rsconnect add --account matthewjwhittle --name matthewjwhittle --token ${{ secrets.RSCONNECT_TOKEN }} --secret ${{ secrets.RSCONNECT_SECRET }}
+        
+    - name: Create .env file in dashboard directory
+      uses: SpicyPizza/create-envfile@v2.0
+      with:
+        envkey_SP_PRIVATE_KEY_ID: ${{ secrets.SP_PRIVATE_KEY_ID }}
+        envkey_SP_PRIVATE_KEY: ${{ secrets.SP_PRIVATE_KEY }}
+        envkey_SP_CLIENT_EMAIL: ${{ secrets.SP_CLIENT_EMAIL }}
+        envkey_SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
+        directory: dashboard
+        file_name: .env
+        fail_on_empty: false
+        sort_keys: false
+        
+    - name: Deploy App
+      run: |
+        rsconnect deploy shiny dashboard/ --title sygb-hsm-dev 
