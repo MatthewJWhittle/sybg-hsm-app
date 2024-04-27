@@ -1,24 +1,18 @@
 "Functions for loading and processing data for the dashboard"
 from pathlib import Path
-import os
 
-from dotenv import load_dotenv
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
 import rioxarray as rxr
 import matplotlib.pyplot as plt
-from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
-from gcsfs import GCSFileSystem
-from google.cloud import storage
 
-from app_config import app_dir
-from app_utils.cloud import gc_credentials_dict
+from app_utils.cloud import CloudBucket
 
-def connect_gcsfs() -> GCSFileSystem:
-    return GCSFileSystem(project="sy-bat", token=gc_credentials_dict())
+
+app_data_bucket = CloudBucket("sygb-data")
 
 def normalize(array: np.ndarray, vmin=None, vmax=None):
     """
@@ -130,10 +124,9 @@ def load_results_df() -> pd.DataFrame:
     """
     This function loads the results dataframe
     """
-    uri = "gs://sygb-data/app_data/results.csv"
     # Load the results data
-    with connect_gcsfs().open(uri) as file:
-        results_df = pd.read_csv(file)
+    with app_data_bucket.get_blob_bytes(blob_name="app_data/results.csv") as file_bytes:
+        results_df = pd.read_csv(file_bytes)
     # Return the dataframe
     return results_df
 
@@ -143,9 +136,9 @@ def load_training_data() -> gpd.GeoDataFrame:
     This function loads the training data
     """
     # Load the training data
-    uri = "gs://sygb-data/app_data/bat-records.parquet"
-    with connect_gcsfs().open(uri) as file:
-        training_data_gdf = gpd.read_parquet(file)
+    blob_name = "app_data/bat-records.parquet"
+    with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
+        training_data_gdf = gpd.read_parquet(file_bytes)
     training_data_gdf = training_data_gdf.to_crs(4326)
     # Return the dataframe
     return training_data_gdf
@@ -157,9 +150,10 @@ def load_predictions() -> xr.Dataset:
 
     This function loads the tif and processes it to be in the correct format for the dashboard.
     """
-    uri = "gs://sygb-data/app_data/predictions_cog.tif"
-    with connect_gcsfs().open(uri) as file:
-        predictions = rxr.open_rasterio(file)
+    blob_name = "app_data/predictions_cog.tif"
+
+    with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
+        predictions = rxr.open_rasterio(file_bytes)
         predictions.coords["band"] = list(predictions.attrs["long_name"])
         # Set the nodata appropriately
         nodata = -1
@@ -177,9 +171,9 @@ def load_partial_dependence_data() -> pd.DataFrame:
     """
     This function loads the partial dependence data
     """
-    uri = "gs://sygb-data/app_data/partial-dependence-data.parquet"
-    with connect_gcsfs().open(uri) as file:
-        return pd.read_parquet(file)
+    blob_name = "app_data/partial-dependence-data.parquet"
+    with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
+        return pd.read_parquet(file_bytes)
 
 
 def calculate_dependence_range(df: pd.DataFrame) -> pd.DataFrame:
@@ -206,8 +200,8 @@ def load_south_yorkshire():
     This function loads the counties data which is a large file and filters it for those in south yorkshire
     """
     # Load the counties data
-    uri = "gs://sygb-data/app_data/boundary.parquet"
-    with connect_gcsfs().open(uri) as file:
-        boundary = gpd.read_parquet(file)
+    blob_name = "app_data/boundary.parquet"
+    with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
+        boundary = gpd.read_parquet(file_bytes)
     # Return the dataframe
     return boundary

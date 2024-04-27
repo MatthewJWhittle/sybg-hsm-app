@@ -47,4 +47,4 @@ jobs:
         
     - name: Deploy App
       run: |
-        rsconnect deploy shiny dashboard/ --title sygb-hsm 
+        rsconnect deploy shiny dashboard/ --title sygb-hsm --app-id 11676161

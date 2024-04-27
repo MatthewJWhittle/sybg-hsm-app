@@ -11,6 +11,4 @@ pyarrow
 matplotlib 
 python-dotenv
 ipyleaflet
-fsspec
-gcsfs
 google-cloud-storage

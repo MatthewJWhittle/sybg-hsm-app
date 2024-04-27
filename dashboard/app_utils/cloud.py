@@ -1,11 +1,11 @@
 ""
 import os
-from pathlib import Path
+from io import BytesIO
 
 from google.oauth2 import service_account
 from google.cloud import storage
 from datetime import datetime, timezone, timedelta
-from google.auth import load_credentials_from_dict
+from google.cloud.storage import Client
 from dotenv import load_dotenv
 
 from app_config import app_dir
@@ -61,5 +61,17 @@ def generate_signed_url(bucket_name: str, blob_name: str, expiration_time_second
 
     #Get the signed URL
     url = blob.generate_signed_url(expiration=expiration_time)
-    
     return url
+
+
+class CloudBucket:
+    def __init__(self, bucket_name: str):
+        self.bucket_name = bucket_name
+        credentials = gc_credentials_dict()
+        self.project_id = credentials["project_id"]
+        self.client = Client(credentials=service_account.Credentials.from_service_account_info(credentials))
+        self.bucket = self.client.bucket(self.bucket_name)
+
+    def get_blob_bytes(self, blob_name: str):
+        blob = self.bucket.blob(blob_name)
+        return BytesIO(blob.download_as_bytes())

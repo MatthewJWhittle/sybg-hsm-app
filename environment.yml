@@ -22,6 +22,5 @@ dependencies:
     - shinywidgets
     - python-dotenv
     - fsspec
-    - gcsfs
     - rsconnect-python
     - google-cloud-storage
