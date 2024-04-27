@@ -32,6 +32,19 @@ jobs:
     - name: Register
       run: | 
         rsconnect add --account matthewjwhittle --name matthewjwhittle --token ${{ secrets.RSCONNECT_TOKEN }} --secret ${{ secrets.RSCONNECT_SECRET }}
+        
+    - name: Create .env file in dashboard directory
+      uses: SpicyPizza/create-envfile@v2.0
+      with:
+        envkey_SP_PRIVATE_KEY_ID: ${{ secrets.SP_PRIVATE_KEY_ID }}
+        envkey_SP_PRIVATE_KEY: ${{ secrets.SP_PRIVATE_KEY }}
+        envkey_SP_CLIENT_EMAIL: ${{ secrets.SP_CLIENT_EMAIL }}
+        envkey_SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
+        directory: dashboard
+        file_name: .env
+        fail_on_empty: false
+        sort_keys: false
+        
     - name: Deploy App
       run: |
         rsconnect deploy shiny dashboard/ --title sygb-hsm 

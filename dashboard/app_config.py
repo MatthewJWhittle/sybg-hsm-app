@@ -1,3 +1,6 @@
+from pathlib import Path
+app_dir = Path(__file__).parent
+
 species_name_mapping = {
     "Pipistrellus pipistrellus": "Common Pipistrelle",
     "Pipistrellus pygmaeus": "Soprano Pipistrelle",

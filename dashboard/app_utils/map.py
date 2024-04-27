@@ -43,39 +43,6 @@ def get_layer(
     return None
 
 
-
-
-def record_popup(feature) -> str:
-    """
-    Generates an HTML string for a popup based on the provided feature of bat data.
-    """
-
-    popup = tags.div(
-        tags.h4(f"{feature['common_name']} ({feature['latin_name']})"),
-        tags.table(
-            tags.tr(
-                tags.td("Activity:"),
-                tags.td(feature['activity_type'])
-            ),
-            tags.tr(
-                tags.td("Date:"),
-                tags.td(feature['date'][:10] if pd.notna(feature['date']) else 'N/A')
-            ),
-            tags.tr(
-                tags.td("Recorder:"),
-                tags.td(feature['Recorder'])
-            ),
-            tags.tr(
-                tags.td("Notes:"),
-                tags.td(feature['Notes'] if pd.notna(feature['Notes']) else 'N/A')
-            ),
-        ),
-        className="map-popup"
-
-    )
-
-    return popup._repr_html_()
-
 from ipyleaflet import Map, basemaps, basemap_to_tiles, GeoData, LayersControl
 def generate_basemap(south_yorkshire: gpd.GeoDataFrame):
         ## Map ----------------------------------------------------------------------

@@ -6,7 +6,6 @@ from shiny import App, render, ui, reactive
 from ipyleaflet import (
     Map,
     GeoData,
-    Popup,
     ImageOverlay,
 )
 from shinywidgets import register_widget, render_widget
@@ -18,21 +17,22 @@ from dotenv import load_dotenv
 # Local imports
 from modules.ui import app_ui
 
-from app_utils.map import record_popup, generate_basemap, layer_exists, get_layer
-from app_config import species_name_mapping, feature_names
+from app_config import species_name_mapping, feature_names, app_dir
+
+from app_utils.map import generate_basemap, layer_exists, get_layer
 from app_utils.data import (
     load_training_data,
     load_partial_dependence_data,
     calculate_dependence_range,
     load_south_yorkshire,
-    load_predictions,
-    write_tif_to_pngs,
-    load_results_df
+    setup_pngs,
+    load_results_df, 
 )
+from app_utils.cloud import generate_signed_url
 from app_utils.geo import project_bbox
 
 
-app_dir = Path(__file__).parent
+
 css_path = app_dir / "www" / "styles.css"
 
 load_dotenv()
@@ -56,10 +56,7 @@ dependence_range = calculate_dependence_range(partial_dependence_df)
 png_dir = app_dir / "data" / "predictions_png"
 png_dir.mkdir(exist_ok=True, parents=True)
 
-png_paths, tif_bounds, tif_crs = write_tif_to_pngs(
-    load_predictions(),
-    png_dir,
-    overwrite=False
+png_urls, tif_bounds, tif_crs = setup_pngs(
 )
 
 tif_bounds = project_bbox(tif_bounds, f"EPSG:{tif_crs}", "EPSG:4326")
@@ -162,11 +159,15 @@ def server(input, output, session):
     @reactive.Calc
     def predictions_png_path():
         band_name = selected_results()["band_name"].values[0]
-        url =f"https://raw.githubusercontent.com/MatthewJWhittle/shefflied-bats/dashboard/dashboard/data/predictions_png/{band_name}.png?raw=true"
+        #url =f"https://storage.googleapis.com/sygb-data/app_data/predictions_png/{band_name}.png"
         
         # encode the url replacing spaces with %20
-        url = url.replace(" ", "%20")
+        #url = url.replace(" ", "%20")
         #path = Path(app_dir) / "data/predictions_png/Pipistrellus pipistrellus_Foraging.png"
+        #print(png_urls[band_name])
+
+        file_path = f"app_data/predictions_png/{band_name}.png"
+        url = generate_signed_url("sygb-data", file_path)
         return url
 
     @reactive.Calc
@@ -184,7 +185,7 @@ def server(input, output, session):
     @output
     @render_widget
     def main_map() -> Map:
-        png_path = predictions_png_path()
+        png_url = predictions_png_path()
 
         if layer_exists(base_map, "HSM Predictions"):
             old_layer = get_layer(base_map, "HSM Predictions")
@@ -194,9 +195,9 @@ def server(input, output, session):
         sw_corner = [tif_bounds[0], tif_bounds[1]]
         ne_corner = [tif_bounds[2], tif_bounds[3]]
         bounds = [sw_corner, ne_corner]
-
+        
         image_overlay = ImageOverlay(
-            url=png_path,
+            url=png_url,
             bounds=bounds,
             name="HSM Predictions",
             opacity=input.hsm_opacity(),
@@ -214,20 +215,6 @@ def server(input, output, session):
             point_style={'color': 'black', 'radius':6, 'fillColor': '#F96E46', 'opacity':0.8, 'weight':1.3,  'fillOpacity':0.8},
             hover_style={'fillColor': '#00E8FC' , 'fillOpacity': 1},
         )
-        def generate_popup(event, properties, id, **kwargs):
-            """
-            Generate a popup for a feature on the map.
-            """
-            #print(properties)
-            popup_content = record_popup(properties)
-            popup = Popup(
-                location=properties["geometry"]["coordinates"],
-                child=popup_content,
-            )
-            # get the marker and open the popup
-            base_map.add(popup)
-
-        geo_data.on_click(generate_popup)
 
         if layer_exists(base_map, layer_name):
             old_layer = get_layer(base_map, layer_name)

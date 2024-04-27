@@ -1,6 +1,8 @@
 "Functions for loading and processing data for the dashboard"
 from pathlib import Path
+import os
 
+from dotenv import load_dotenv
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -10,11 +12,15 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
 from gcsfs import GCSFileSystem
+from google.cloud import storage
 
+from app_config import app_dir
+from app_utils.cloud import gc_credentials_dict
 
+def connect_gcsfs() -> GCSFileSystem:
+    return GCSFileSystem(project="sy-bat", token=gc_credentials_dict())
 
-
-def normalize(array:np.ndarray, vmin=None, vmax=None):
+def normalize(array: np.ndarray, vmin=None, vmax=None):
     """
     This function normalizes an array to be between 0 and 1.
     """
@@ -27,7 +33,7 @@ def normalize(array:np.ndarray, vmin=None, vmax=None):
     return array
 
 
-def array_to_rgb(array:np.ndarray, colormap="viridis", vmin=None, vmax=None):
+def array_to_rgb(array: np.ndarray, colormap="viridis", vmin=None, vmax=None):
     """
     This function converts an array to a RGB array using a colormap.
     """
@@ -39,28 +45,27 @@ def array_to_rgb(array:np.ndarray, colormap="viridis", vmin=None, vmax=None):
     return rgb
 
 
-
 def write_tif_to_pngs(
-        dataset:xr.Dataset,
-        out_dir:Path, 
-        colormap="viridis", 
-        vmin=None, 
-        vmax=None, 
-        overwrite=False
-        ) -> tuple[dict[str, Path], tuple, int]:
+    dataset: xr.Dataset,
+    out_dir: Path,
+    colormap="viridis",
+    vmin=None,
+    vmax=None,
+    overwrite=False,
+) -> tuple[dict[str, Path], tuple, int]:
     """
     This function converts each band of a tif file to a RGB array and writes it to a PNG file.
     """
     # Get the band names
     band_names = dataset.data_vars.keys()
-    output_paths  = {}
+    output_paths = {}
 
     colormap_fn = get_cmap(colormap)
     tif_bounds = dataset.rio.bounds()
     tif_crs = dataset.rio.crs.to_epsg()
     # Loop through each band
     for band_name in band_names:
-        out_path = out_dir/f"{band_name}.png"
+        out_path = out_dir / f"{band_name}.png"
         output_paths[band_name] = out_path
 
         if out_path.exists() and not overwrite:
@@ -77,35 +82,58 @@ def write_tif_to_pngs(
         rgb = colormap_fn(band)
         # Write the PNG file
         plt.imsave(out_path, rgb)
-        
 
     return output_paths, tif_bounds, tif_crs
 
 
-#file_paths = download_data()
+def setup_pngs() -> tuple[dict[str, Path], tuple, int]:
+    """
+    This function sets up the PNGs for the dashboard.
+    """
+    # base url
+    base_uri = "gs://sygb-data/app_data/predictions_png"
+    #base_url = "https://storage.googleapis.com/sygb-data/app_data/predictions_png"
+    # Load the predictions
+    dataset = load_predictions()
+    # Get the band names
+    band_names = dataset.data_vars.keys()
+    output_paths = {}
+    tif_bounds = dataset.rio.bounds()
+    tif_crs = dataset.rio.crs.to_epsg()
+    # Loop through each band
+    for band_name in band_names:
+        png_url = f"{base_uri}/{band_name}.png"
+        png_url.replace(" ", "%20")
+        output_paths[band_name] = png_url
+    # Return the paths
+    return output_paths, tif_bounds, tif_crs
+
+
+# file_paths = download_data()
 def setup_paths():
     remote_dir = "gs://sygb-data/app_data"
     file_dependencies = {
-        "results" : "results.csv",
-        "bat_records" : "bat-records.parquet",
-        "predictions" : "predictions_cog.tif",
-        "boundary" : "boundary.parquet",
-        "partial_dependence" : "partial-dependence-data.parquet",
+        "results": "results.csv",
+        "bat_records": "bat-records.parquet",
+        "predictions": "predictions_cog.tif",
+        "boundary": "boundary.parquet",
+        "partial_dependence": "partial-dependence-data.parquet",
     }
     file_paths = {}
     for key, file in file_dependencies.items():
         file_paths[key] = f"{remote_dir}/{file}"
-    
-    return file_paths
 
+    return file_paths
 
 
 def load_results_df() -> pd.DataFrame:
     """
     This function loads the results dataframe
     """
+    uri = "gs://sygb-data/app_data/results.csv"
     # Load the results data
-    results_df = pd.read_csv("https://storage.googleapis.com/sygb-data/app_data/results.csv")
+    with connect_gcsfs().open(uri) as file:
+        results_df = pd.read_csv(file)
     # Return the dataframe
     return results_df
 
@@ -116,12 +144,11 @@ def load_training_data() -> gpd.GeoDataFrame:
     """
     # Load the training data
     uri = "gs://sygb-data/app_data/bat-records.parquet"
-    with GCSFileSystem().open(uri) as file:
+    with connect_gcsfs().open(uri) as file:
         training_data_gdf = gpd.read_parquet(file)
     training_data_gdf = training_data_gdf.to_crs(4326)
     # Return the dataframe
     return training_data_gdf
-
 
 
 def load_predictions() -> xr.Dataset:
@@ -130,17 +157,18 @@ def load_predictions() -> xr.Dataset:
 
     This function loads the tif and processes it to be in the correct format for the dashboard.
     """
-    url = "https://storage.googleapis.com/sygb-data/app_data/predictions_cog.tif"
-    predictions = rxr.open_rasterio(url)
-    predictions.coords["band"] = list(predictions.attrs["long_name"])
-    # Set the nodata appropriately
-    nodata = -1
-    predictions = predictions.where(predictions >= 0, np.nan)
+    uri = "gs://sygb-data/app_data/predictions_cog.tif"
+    with connect_gcsfs().open(uri) as file:
+        predictions = rxr.open_rasterio(file)
+        predictions.coords["band"] = list(predictions.attrs["long_name"])
+        # Set the nodata appropriately
+        nodata = -1
+        predictions = predictions.where(predictions >= 0, np.nan)
 
-    # convert to a dataset to allow band name indexing
-    predictions = predictions.to_dataset(dim="band")
-    # Convert back to 0-1
-    predictions = predictions / 100
+        # convert to a dataset to allow band name indexing
+        predictions = predictions.to_dataset(dim="band")
+        # Convert back to 0-1
+        predictions = predictions / 100
 
     return predictions
 
@@ -149,9 +177,9 @@ def load_partial_dependence_data() -> pd.DataFrame:
     """
     This function loads the partial dependence data
     """
-    path = "https://storage.googleapis.com/sygb-data/app_data/partial-dependence-data.parquet"
-    return pd.read_parquet(path)
-
+    uri = "gs://sygb-data/app_data/partial-dependence-data.parquet"
+    with connect_gcsfs().open(uri) as file:
+        return pd.read_parquet(file)
 
 
 def calculate_dependence_range(df: pd.DataFrame) -> pd.DataFrame:
@@ -179,7 +207,7 @@ def load_south_yorkshire():
     """
     # Load the counties data
     uri = "gs://sygb-data/app_data/boundary.parquet"
-    with GCSFileSystem().open(uri) as file:
+    with connect_gcsfs().open(uri) as file:
         boundary = gpd.read_parquet(file)
     # Return the dataframe
     return boundary
