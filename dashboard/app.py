@@ -25,7 +25,7 @@ from app_utils.data import (
     load_partial_dependence_data,
     calculate_dependence_range,
     load_south_yorkshire,
-    setup_pngs,
+    load_metadata,
     load_results_df, 
 )
 from app_utils.cloud import generate_signed_url, get_env_folder
@@ -49,18 +49,19 @@ south_yorkshire = load_south_yorkshire()
 
 dependence_range = calculate_dependence_range(partial_dependence_df)
 
-
+metadata = load_metadata()
 
 ## save the predictions to PNGs somewhere the app can GET them
 
 png_dir = app_dir / "data" / "predictions_png"
 png_dir.mkdir(exist_ok=True, parents=True)
 
-png_urls, tif_bounds, tif_crs = setup_pngs(
-)
+tif_bounds = metadata["prediction_bbox"]
+tif_crs = metadata["bbox_crs"]
 
-tif_bounds = project_bbox(tif_bounds, f"EPSG:{tif_crs}", "EPSG:4326")
 
+print(tif_bounds)
+print(tif_crs)
 ### App UI
 
 main_app_ui = app_ui(
@@ -72,7 +73,6 @@ main_app_ui = app_ui(
 
 show_disclaimer = reactive.Value(True)
 disclaimer_text = load_md_file(app_dir / "text" / "disclaimer.md")
-print(disclaimer_text)
 def server(input, output, session):
     @reactive.effect
     @reactive.event(show_disclaimer)
@@ -172,12 +172,6 @@ def server(input, output, session):
     @reactive.Calc
     def predictions_png_path():
         band_name = selected_results()["band_name"].values[0]
-        #url =f"https://storage.googleapis.com/sygb-data/app_data/predictions_png/{band_name}.png"
-        
-        # encode the url replacing spaces with %20
-        #url = url.replace(" ", "%20")
-        #path = Path(app_dir) / "data/predictions_png/Pipistrellus pipistrellus_Foraging.png"
-        #print(png_urls[band_name])
 
         file_path = f"{app_data_folder}/predictions_png/{band_name}.png"
         url = generate_signed_url("sygb-data", file_path)
@@ -205,10 +199,12 @@ def server(input, output, session):
             base_map.remove_layer(old_layer)
 
         # Get the bounds of the tif
-        sw_corner = [tif_bounds[0], tif_bounds[1]]
-        ne_corner = [tif_bounds[2], tif_bounds[3]]
+        sw_corner = [tif_bounds[1], tif_bounds[0]]
+        ne_corner = [tif_bounds[3], tif_bounds[2]]
         bounds = [sw_corner, ne_corner]
+        print(bounds)
         
+        print(png_url)
         image_overlay = ImageOverlay(
             url=png_url,
             bounds=bounds,

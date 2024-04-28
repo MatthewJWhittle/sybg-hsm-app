@@ -1,4 +1,5 @@
 "Functions for loading and processing data for the dashboard"
+import json
 from pathlib import Path
 
 import geopandas as gpd
@@ -8,13 +9,24 @@ import xarray as xr
 import rioxarray as rxr
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
-
 from app_utils.cloud import CloudBucket, get_env_folder
 
 app_data_folder = get_env_folder()
 
 
 app_data_bucket = CloudBucket("sygb-data")
+
+
+def load_metadata():
+    """
+    This function loads the metadata for the dashboard.
+    """
+    # Load the metadata
+    with app_data_bucket.get_blob_bytes(blob_name=f"{app_data_folder}/metadata.json") as file_bytes:
+        metadata = json.load(file_bytes)
+    # Return the metadata
+    return metadata
+
 
 def normalize(array: np.ndarray, vmin=None, vmax=None):
     """
@@ -91,6 +103,7 @@ def setup_pngs() -> tuple[dict[str, Path], tuple, int]:
     #base_url = "https://storage.googleapis.com/sygb-data/app_data/predictions_png"
     # Load the predictions
     dataset = load_predictions()
+    #dataset = dataset.rio.reproject("EPSG:4326")
     # Get the band names
     band_names = dataset.data_vars.keys()
     output_paths = {}
