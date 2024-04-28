@@ -28,9 +28,9 @@ from app_utils.data import (
     setup_pngs,
     load_results_df, 
 )
-from app_utils.cloud import generate_signed_url
+from app_utils.cloud import generate_signed_url, get_env_folder
 from app_utils.geo import project_bbox
-
+app_data_folder = get_env_folder()
 
 
 css_path = app_dir / "www" / "styles.css"
@@ -166,7 +166,7 @@ def server(input, output, session):
         #path = Path(app_dir) / "data/predictions_png/Pipistrellus pipistrellus_Foraging.png"
         #print(png_urls[band_name])
 
-        file_path = f"app_data/predictions_png/{band_name}.png"
+        file_path = f"{app_data_folder}/predictions_png/{band_name}.png"
         url = generate_signed_url("sygb-data", file_path)
         return url
 

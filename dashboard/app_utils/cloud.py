@@ -10,6 +10,16 @@ from dotenv import load_dotenv
 
 from app_config import app_dir
 
+
+def get_env_folder():
+    load_dotenv(app_dir / ".env")
+    env_type = os.getenv("ENV_TYPE", "prod")
+    folders = {
+        "dev": "app_data_dev",
+        "prod": "app_data",
+    }
+    return folders[env_type]
+
 def gc_credentials_dict() -> dict:
     load_dotenv(app_dir / ".env")
 

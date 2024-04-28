@@ -9,7 +9,9 @@ import rioxarray as rxr
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 
-from app_utils.cloud import CloudBucket
+from app_utils.cloud import CloudBucket, get_env_folder
+
+app_data_folder = get_env_folder()
 
 
 app_data_bucket = CloudBucket("sygb-data")
@@ -85,7 +87,7 @@ def setup_pngs() -> tuple[dict[str, Path], tuple, int]:
     This function sets up the PNGs for the dashboard.
     """
     # base url
-    base_uri = "gs://sygb-data/app_data/predictions_png"
+    base_uri = f"gs://sygb-data/{app_data_folder}/predictions_png"
     #base_url = "https://storage.googleapis.com/sygb-data/app_data/predictions_png"
     # Load the predictions
     dataset = load_predictions()
@@ -105,7 +107,7 @@ def setup_pngs() -> tuple[dict[str, Path], tuple, int]:
 
 # file_paths = download_data()
 def setup_paths():
-    remote_dir = "gs://sygb-data/app_data"
+    remote_dir = f"gs://sygb-data/{app_data_folder}"
     file_dependencies = {
         "results": "results.csv",
         "bat_records": "bat-records.parquet",
@@ -125,7 +127,7 @@ def load_results_df() -> pd.DataFrame:
     This function loads the results dataframe
     """
     # Load the results data
-    with app_data_bucket.get_blob_bytes(blob_name="app_data/results.csv") as file_bytes:
+    with app_data_bucket.get_blob_bytes(blob_name=f"{app_data_folder}/results.csv") as file_bytes:
         results_df = pd.read_csv(file_bytes)
     # Return the dataframe
     return results_df
@@ -136,7 +138,7 @@ def load_training_data() -> gpd.GeoDataFrame:
     This function loads the training data
     """
     # Load the training data
-    blob_name = "app_data/bat-records.parquet"
+    blob_name = f"{app_data_folder}/bat-records.parquet"
     with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
         training_data_gdf = gpd.read_parquet(file_bytes)
     training_data_gdf = training_data_gdf.to_crs(4326)
@@ -150,7 +152,7 @@ def load_predictions() -> xr.Dataset:
 
     This function loads the tif and processes it to be in the correct format for the dashboard.
     """
-    blob_name = "app_data/predictions_cog.tif"
+    blob_name = f"{app_data_folder}/predictions_cog.tif"
 
     with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
         predictions = rxr.open_rasterio(file_bytes)
@@ -171,7 +173,7 @@ def load_partial_dependence_data() -> pd.DataFrame:
     """
     This function loads the partial dependence data
     """
-    blob_name = "app_data/partial-dependence-data.parquet"
+    blob_name = f"{app_data_folder}/partial-dependence-data.parquet"
     with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
         return pd.read_parquet(file_bytes)
 
@@ -200,7 +202,7 @@ def load_south_yorkshire():
     This function loads the counties data which is a large file and filters it for those in south yorkshire
     """
     # Load the counties data
-    blob_name = "app_data/boundary.parquet"
+    blob_name = f"{app_data_folder}/boundary.parquet"
     with app_data_bucket.get_blob_bytes(blob_name=blob_name) as file_bytes:
         boundary = gpd.read_parquet(file_bytes)
     # Return the dataframe
