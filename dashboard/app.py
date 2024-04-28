@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from modules.ui import app_ui
 
 from app_config import species_name_mapping, feature_names, app_dir
-
+from app_utils import load_md_file
 from app_utils.map import generate_basemap, layer_exists, get_layer
 from app_utils.data import (
     load_training_data,
@@ -70,8 +70,21 @@ main_app_ui = app_ui(
     
 )
 
-
+show_disclaimer = reactive.Value(True)
+disclaimer_text = load_md_file(app_dir / "text" / "disclaimer.md")
+print(disclaimer_text)
 def server(input, output, session):
+    @reactive.effect
+    @reactive.event(show_disclaimer)
+    def _():
+        m = ui.modal(
+            ui.markdown(disclaimer_text),
+            title="Welcome to the South Yorkshire Bat Group HSM App",
+            easy_close=True,
+            footer=None,
+            size="l",
+        )
+        ui.modal_show(m)
 
     @reactive.Calc
     def selected_results() -> pd.DataFrame:
@@ -212,7 +225,7 @@ def server(input, output, session):
         geo_data = GeoData(
             geo_dataframe=map_points(), 
             name="Species Records", 
-            point_style={'color': 'black', 'radius':6, 'fillColor': '#F96E46', 'opacity':0.8, 'weight':1.3,  'fillOpacity':0.8},
+            style={'color': 'black', 'radius':6, 'fillColor': '#F96E46', 'opacity':0.8, 'weight':1.3,  'fillOpacity':0.8},
             hover_style={'fillColor': '#00E8FC' , 'fillOpacity': 1},
         )
 

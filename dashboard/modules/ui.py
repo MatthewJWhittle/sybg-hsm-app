@@ -1,8 +1,11 @@
+from pathlib import Path
+
 from shiny import ui, module
 from shiny import reactive
 import shinyswatch
 from shinywidgets import output_widget
 from app_config import feature_names
+
 
 partial_dependence_explanation = "A partial dependence plot (PDP) is a visualization tool used in habitat suitability modelling to show the relationship between a specific variable and the predicted suitability, while averaging out the effects of all other features in the model. It helps to understand how the predicted suitability depends on the feature of interest (e.g. woodland cover), regardless of the values of the other features. However, PDPs do not capture complex interactions between features, so they might not fully represent how various environmental factors together affect bat habitat suitability"
 
