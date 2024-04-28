@@ -2,10 +2,10 @@
     "https://api.shinyapps.io": {
         "server_url": "https://api.shinyapps.io",
         "filename": "/Users/work/Data Science/sybg-hsm-app/dashboard",
-        "app_url": "https://matthewjwhittle.shinyapps.io/sygb-hsm-dev/",
-        "app_id": 11877789,
+        "app_url": "https://matthewjwhittle.shinyapps.io/sybg-hsm/",
+        "app_id": 11882310,
         "app_guid": null,
-        "title": "sygb-hsm-dev",
+        "title": "sybg-hsm",
         "app_mode": "python-shiny",
         "app_store_version": 1
     }

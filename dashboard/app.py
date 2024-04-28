@@ -59,9 +59,6 @@ png_dir.mkdir(exist_ok=True, parents=True)
 tif_bounds = metadata["prediction_bbox"]
 tif_crs = metadata["bbox_crs"]
 
-
-print(tif_bounds)
-print(tif_crs)
 ### App UI
 
 main_app_ui = app_ui(
@@ -202,9 +199,7 @@ def server(input, output, session):
         sw_corner = [tif_bounds[1], tif_bounds[0]]
         ne_corner = [tif_bounds[3], tif_bounds[2]]
         bounds = [sw_corner, ne_corner]
-        print(bounds)
-        
-        print(png_url)
+
         image_overlay = ImageOverlay(
             url=png_url,
             bounds=bounds,
