@@ -110,14 +110,14 @@ def app_ui(css_path, species_name_mapping, results_df):
                 ui.tags.div(class_="spacer"),
                 ui.div(
                     ui.column(
-                        width=2,
+                        width=3,
                     ),
                     ui.column(
                         8,  # Width
                         about.markdown(),
                     ),
                     ui.column(
-                        width=2,
+                        width=3,
                     ),
                     class_="about-container",
                 ),
