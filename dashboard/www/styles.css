@@ -14,7 +14,7 @@
     background: white;
     opacity: 70%;
     width: 300px;
-    height: 70vh;
+    height: 45vh;
     overflow: scroll;
     padding: 20px;
     border-radius: 5px;
@@ -32,4 +32,13 @@
 
 .leaflet-image-layer{
     image-rendering: pixelated;
+}
+
+
+.about-container{
+    display: flex;
+}
+
+h1, h2, h3, h4, h5, h6{
+    margin-top: 30px;
 }

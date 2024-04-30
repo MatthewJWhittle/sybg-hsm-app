@@ -6,6 +6,8 @@ import shinyswatch
 from shinywidgets import output_widget
 from app_config import feature_names
 
+from modules.pages import about
+
 
 partial_dependence_explanation = "A partial dependence plot (PDP) is a visualization tool used in habitat suitability modelling to show the relationship between a specific variable and the predicted suitability, while averaging out the effects of all other features in the model. It helps to understand how the predicted suitability depends on the feature of interest (e.g. woodland cover), regardless of the values of the other features. However, PDPs do not capture complex interactions between features, so they might not fully represent how various environmental factors together affect bat habitat suitability"
 
@@ -16,7 +18,7 @@ def app_ui(css_path, species_name_mapping, results_df):
         shinyswatch.theme.minty(),
         ui.page_navbar(
             ui.nav_panel(
-                "HSM Maps",
+                "Maps",
                 output_widget("main_map"),
                 ui.panel_absolute(
                     ui.tags.h3("Select a Species"),
@@ -42,22 +44,11 @@ def app_ui(css_path, species_name_mapping, results_df):
                         ui.output_ui("model_description"),
                         class_="model-description-container",
                     ),
-                    ui.tags.hr(),
-                    ui.div(
-                        ui.tags.h5("About"),
-                        ui.tags.p(
-                            "This app visualises the results of habitat suitability modelling work carried out by Greg Slack and Matthew Whittle on behalf of South Yorkshire Bat Group."),
-                            # add email as link
-                        ui.tags.p(
-                            "The app is built & maintained by: Matthew Whittle. If you have any questions or feedback, please get in touch (matthewjwhittle@gmail.com)."
-                        ),
-
-                    ),
                     class_="model-selection-container",
                 ),
             ),
             ui.nav_panel(
-                "Variable Importance",
+                "Model Variables",
                 ui.layout_sidebar(
                     ui.panel_sidebar(
                         ui.input_selectize(
@@ -82,21 +73,20 @@ def app_ui(css_path, species_name_mapping, results_df):
                                 # text
                                 ui.tags.p("Plot Influence of:"),
                             ),
-                        ui.column(
-                            3,
-                            ui.div(
-                                ui.input_selectize(
-                                    id="feature_mi",
-                                    label="",
-                                    choices=feature_names,
+                            ui.column(
+                                3,
+                                ui.div(
+                                    ui.input_selectize(
+                                        id="feature_mi",
+                                        label="",
+                                        choices=feature_names,
+                                    ),
                                 ),
-                            ),
                             ),
                             ui.row(
                                 ui.div(
-
-                                ui.output_plot("partial_dependence_plot"),
-                                class_="partial-dependence-plot-container",
+                                    ui.output_plot("partial_dependence_plot"),
+                                    class_="partial-dependence-plot-container",
                                 ),
                                 ui.tags.p(partial_dependence_explanation),
                             ),
@@ -114,6 +104,38 @@ def app_ui(css_path, species_name_mapping, results_df):
                     style="display: flex; flex-direction: column; align-items: center; padding-top: 20px;",
                 ),
             ),
+            ui.nav_spacer(),
+            ui.nav_panel(
+                "About",
+                ui.tags.div(class_="spacer"),
+                ui.div(
+                    ui.column(
+                        width=3,
+                    ),
+                    ui.column(
+                        8,  # Width
+                        about.markdown(),
+                    ),
+                    ui.column(
+                        width=3,
+                    ),
+                    class_="about-container",
+                ),
+            ),
+            ui.nav_panel(
+                "Get in Touch!",
+                ui.tags.iframe(
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSeOPgCJ0EC-zFzJQoLuFNh5x8OK7lQPbJyAAgdQk_twaUBtZg/viewform?embedded=true",
+                    width="100%",
+                    height="800px",
+                    frameborder="0",
+                    marginheight="0",
+                    marginwidth="0",
+                ),
+            ),
             title="HSM: South Yorkshire Bat Group",
         ),
     )
+
+
+#  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeOPgCJ0EC-zFzJQoLuFNh5x8OK7lQPbJyAAgdQk_twaUBtZg/viewform?embedded=true" width="640" height="936" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
