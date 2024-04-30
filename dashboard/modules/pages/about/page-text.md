@@ -2,13 +2,13 @@
 
 This app visualises the results of habitat suitability modelling work carried out by South Yorkshire Bat Group. You can use the app to explore the predicted bat distribution across South Yorkshire.
 
-**What is Habitat Suitability Modelling?** Habitat suitability modeling (also known as Species Distribution Modelling) is a technique used to predict the most favorable environments for particular species, such as bats, based on specific ecological and geographical criteria. This process starts by collecting and analysing data on locations where the species has been recorded and examining factors such as vegetation type, proximity to water sources, elevation, topography, and climate conditions. These data are then used to build a statistical model of the species' habitat preferences. The model extrapolates the preferences across a broader area, giving a detailed map of relative high and low predicted suitability. This mapping can be used as a guide for impact assessment and conservation planning, highlighting areas that support important habitat for the species.
+**What is Habitat Suitability Modelling?** Habitat suitability modelling (also known as Species Distribution Modelling) is a technique used to predict the most favorable environments for particular species, such as bats, based on specific ecological and geographical criteria. This process starts by collecting and analysing data on locations where the species has been recorded and examining factors such as vegetation type, proximity to water sources, elevation, topography, and climate conditions. These data are then used to build a statistical model of the species' habitat preferences. The model extrapolates the preferences across a broader area, giving a detailed map of relative high and low predicted suitability. This mapping can be used as a guide for impact assessment and conservation planning, highlighting areas that support important habitat for the species.
 
 **Data Sources and Methodology** 💾
 
 The modelling used a Maximum Entropy model from the [`elapid`](https://earth-chris.github.io/elapid/) Python library. This implementation closely matches the popular [MaxEnt](https://biodiversityinformatics.amnh.org/open_source/maxent/) software package.
 
-South Yorkshire Bat Group provided all bat records used in the modelling. Any records that did not have a grid refernce accuracy of 100m or less were removed from the modelling.
+South Yorkshire Bat Group provided all bat records used in the modelling. Any records that did not have a grid reference accuracy of 100m or less were removed from the modelling.
 
 The modelling used the following data sources to define environmental variables as inputs to the model:
 - WorldClim Climate Data
