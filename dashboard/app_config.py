@@ -2,15 +2,15 @@ from pathlib import Path
 app_dir = Path(__file__).parent
 
 species_name_mapping = {
-    "Pipistrellus pipistrellus": "Common Pipistrelle",
-    "Pipistrellus pygmaeus": "Soprano Pipistrelle",
-    "Plecotus auritus": "Brown Long Eared",
-    "Myotis mystacinus": "Whiskered",
+    "Pipistrellus pipistrellus": "Common pipistrelle",
+    "Pipistrellus pygmaeus": "Soprano pipistrelle",
+    "Plecotus auritus": "Brown long-eared bat",
+    "Myotis mystacinus": "Whiskered bat",
     "Nyctalus noctula": "Noctule",
-    "Myotis daubentonii": "Daubenton's",
-    "Myotis nattereri": "Natterer's",
-    "Nyctalus leisleri": "Leisler's",
-    "Myotis brandtii": "Brandt's",
+    "Myotis daubentonii": "Daubenton's bat",
+    "Myotis nattereri": "Natterer's bat",
+    "Nyctalus leisleri": "Leisler's bat",
+    "Myotis brandtii": "Brandt's bat",
 }
 
 

@@ -3,7 +3,7 @@
 
 > 📘
 > **Please note:** 
-> These maps are based upon model predictions and do not provide a reliable means of confirming either presence or absence. They are useful for impact assessment and conservation planning but are not a replacement for bat surveys to inform development. Please read the information below for more detail.
+> These maps are based upon model predictions and should only be used to predict, rather than confirm, presence or absence. They are useful for impact assessment and conservation planning but are not a replacement for bat surveys to inform development. Please read the information below for more detail.
 
 **Records Search** 🔍
 

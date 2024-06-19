@@ -20,7 +20,7 @@ The modelling used the following data sources to define environmental variables 
 
 [**Greg Slack**](https://www.linkedin.com/in/greg-slack-9212064b/) *Principal Ecologist / Partner at Middleton Bell Ecology Ltd*
 
-Greg is an accomplished ecologist who has managed ecological surveys, mitigation designs, and reporting for major infrastructure projects across the UK, specialising in bat conservation and technical innovation. His work includes developing habitat suitability models and is the author of influential articles on bat survey data interpretation.
+Greg is a seasoned ecologist with extensive experience in coordinating ecological surveys, reporting, and mitigation design. Greg has led some of the first commercial applications of the large scale use of habitat suitability modelling to inform impact assessments for bats. His focus on technical innovation in bat surveys has led to published articles on interpreting bat survey data. Recently, Greg has been concentrating on smaller-scale projects impacting bat roosts.
 
 
 <br>
